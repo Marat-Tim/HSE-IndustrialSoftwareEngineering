@@ -1,0 +1,24 @@
+name: Тесты
+
+on:
+  push:
+    branches:
+      - '*'
+  pull_request:
+    branches:
+      - '*'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout репозитория
+        uses: actions/checkout@v2
+      - name: Установка JDK
+        uses: actions/setup-java@v2
+        with:
+          java-version: '21'
+          distribution: adopt
+      - name: Сборка и тестирование программы
+        run: ./gradlew build

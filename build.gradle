@@ -1,0 +1,103 @@
+project.version = project.properties['projectVersion']
+
+project.group = 'ru.marattim.todolist'
+
+buildscript {
+    ext {
+        springBootVersion = '3.3.4'
+        logbookVersion = "3.9.0"
+        dbSchema = rootProject.name
+        jacocoDestinationFile = "${buildDir}/jacoco/test.exec"
+    }
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+//        classpath("com.google.cloud.tools:jib-gradle-plugin:3.4.3")
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+apply plugin: 'java'
+apply plugin: 'org.springframework.boot'
+apply plugin: 'io.spring.dependency-management'
+apply plugin: 'jacoco'
+//apply plugin: 'com.google.cloud.tools.jib'
+//apply from: 'jib.gradle'
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+}
+
+dependencies {
+    // стартеры
+    implementation('org.springframework.boot:spring-boot-starter-logging')
+    implementation('org.springframework.boot:spring-boot-starter-validation')
+    implementation('org.springframework.boot:spring-boot-starter-web')
+    implementation('org.springframework.boot:spring-boot-starter-actuator')
+    implementation('org.springframework.boot:spring-boot-starter-security')
+    implementation('org.springframework.boot:spring-boot-starter-data-jpa')
+    implementation('org.springframework.boot:spring-boot-starter-mail')
+
+    // бд
+    implementation('org.postgresql:postgresql:42.6.0')
+    implementation('org.liquibase:liquibase-core')
+    runtimeOnly('org.postgresql:postgresql')
+    annotationProcessor('org.hibernate:hibernate-jpamodelgen:6.6.10.Final')
+
+    // тесты
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.springframework.security:spring-security-test")
+    testImplementation('io.zonky.test:embedded-postgres:2.1.0')
+    testImplementation('org.projectlombok:lombok:1.18.30')
+    testAnnotationProcessor('org.projectlombok:lombok:1.18.30')
+
+    // документация
+    implementation('org.springdoc:springdoc-openapi-starter-webmvc-ui:2.1.0')
+
+    // просто удобные зависисмости
+    implementation('org.projectlombok:lombok:1.18.30')
+    annotationProcessor('org.projectlombok:lombok:1.18.30')
+    implementation("org.apache.commons:commons-lang3")
+    implementation("commons-lang:commons-lang:2.4")
+    implementation("org.apache.commons:commons-collections4:4.4")
+    implementation('org.mapstruct:mapstruct:1.5.5.Final')
+    annotationProcessor('org.mapstruct:mapstruct-processor:1.5.5.Final')
+    implementation("io.vavr:vavr:0.10.2")
+    implementation("commons-io:commons-io:2.17.0")
+    implementation "org.zalando:logbook-spring:${logbookVersion}"
+    implementation "org.zalando:logbook-servlet:${logbookVersion}"
+    implementation "org.zalando:logbook-core:${logbookVersion}"
+
+}
+
+configurations {
+    [apiElements, runtimeElements].each {
+        it.outgoing.artifacts.removeIf { it.buildDependencies.getDependencies(null).contains(jar) }
+        it.outgoing.artifact(bootJar)
+    }
+}
+
+bootJar {
+    enabled = true
+}
+
+test {
+    minHeapSize = "256M"
+    maxHeapSize = "1G"
+
+    useJUnitPlatform()
+    finalizedBy(tasks.jacocoTestReport)
+}
+
+jacocoTestReport {
+    reports {
+        xml.required = true
+    }
+}

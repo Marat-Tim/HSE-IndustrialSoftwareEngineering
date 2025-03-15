@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Registration</title>
+</head>
+<body bgcolor="#f5f5f5" style="font-family: Arial, sans-serif;">
+<table width="100%" height="100%" cellspacing="0" cellpadding="0" border="0">
+    <tr>
+        <td align="center" valign="top">
+            <table width="600" cellspacing="0" cellpadding="20" bgcolor="#ffffff"
+                   style="box-shadow: 0 0 10px rgba(0, 0, 0, 0.2); border-radius: 10px;">
+                <tr>
+                    <td align="center">
+                        <h1 style="color: #333;">Добро пожаловать на наш веб-сайт!</h1>
+                        <p style="font-size: 18px; color: #555;">Для завершения процесса
+                            регистрации, пожалуйста, подтвердите свой аккаунт.</p>
+
+                        <!-- Добавляем кнопку -->
+                        <form action="{{url}}" method="post" style="margin-top: 20px;">
+                            <input type="hidden" name="token" value="{{token}}">
+                            <input type="submit" value="Подтвердить регистрацию"
+                                   style="background-color: #007bff; color: #fff; padding: 10px 20px; border: none; border-radius: 5px; font-size: 16px; cursor: pointer;">
+                        </form>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+</body>
+</html>

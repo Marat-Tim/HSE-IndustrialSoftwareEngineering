@@ -1,0 +1,56 @@
+server:
+  port: 8080
+  error:
+    whitelabel:
+      enabled: false
+    include-message: always
+  servlet:
+    context-path: /todolist
+
+spring:
+  main:
+    banner-mode: "off"
+  application:
+    name: todolist
+  jackson:
+    serialization:
+      fail-on-empty-beans: false
+  liquibase:
+    enabled: true
+    change-log: classpath:db/liquibase-changelog.xml
+    default-schema: public
+  jpa:
+    properties:
+      hibernate:
+        default_schema: public
+        format_sql: true
+        generate_statistics: false
+    show-sql: false
+    generate-ddl: false
+    open-in-view: false
+
+logging:
+  level:
+    org.zalando.logbook: TRACE
+    org.springframework.web: INFO
+    ru.marattim: DEBUG
+    org.hibernate.engine: WARN
+    liquibase: ERROR
+    com.zaxxer.hikari.pool.ProxyLeakTask: ERROR
+    org.springframework.web.filter: DEBUG
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+
+springdoc:
+  show-login-endpoint: true
+
+todolist:
+  enable-email-registration: false
+  confirm-url: http://localhost:${server.port}${server.servlet.context-path}/register/confirm/email
+  mail:
+    username: test@notexisting.qwe
+    password: password
