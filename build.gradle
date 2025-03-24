@@ -1,11 +1,40 @@
+import org.jooq.codegen.GenerationTool
+import org.jooq.meta.jaxb.Database
+import org.jooq.meta.jaxb.Generator
+import org.jooq.meta.jaxb.Jdbc
+import org.jooq.meta.jaxb.Target
+import org.yaml.snakeyaml.Yaml
+
+def loadYamlConfig(filePath) {
+    def yaml = new Yaml()
+    def inputStream = new File(filePath).newInputStream()
+    def config = yaml.load(inputStream)
+    inputStream.close()
+    return config
+}
+
 project.version = project.properties['projectVersion']
 
 project.group = 'ru.marattim.todolist'
+
+var dbConfig = loadYamlConfig("application.yml")
+
+ext.db = [
+        url: dbConfig.spring.datasource.url,
+        user: dbConfig.spring.datasource.username,
+        password: dbConfig.spring.datasource.password,
+        schema: 'public',
+        driver: 'org.postgresql.Driver',
+        jooqDbImpl: 'org.jooq.meta.postgres.PostgresDatabase'
+]
+
+ext.genpath = new File("${projectDir}/build/generated/source/jooq/main")
 
 buildscript {
     ext {
         springBootVersion = '3.3.4'
         logbookVersion = "3.9.0"
+        jooqVersion = "3.19.11"
         dbSchema = rootProject.name
         jacocoDestinationFile = "${buildDir}/jacoco/test.exec"
     }
@@ -16,6 +45,12 @@ buildscript {
     dependencies {
         classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
 //        classpath("com.google.cloud.tools:jib-gradle-plugin:3.4.3")
+        classpath group: 'org.jooq', name: 'jooq', version: jooqVersion
+        classpath group: 'org.jooq', name: 'jooq-meta', version: jooqVersion
+        classpath group: 'org.jooq', name: 'jooq-codegen', version: jooqVersion
+        classpath group: 'org.postgresql', name: 'postgresql', version: '42.6.0'
+        classpath "org.liquibase:liquibase-gradle-plugin:3.0.2"
+        classpath 'org.liquibase:liquibase-core:4.26.0'
     }
 }
 
@@ -27,6 +62,7 @@ apply plugin: 'java'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
 apply plugin: 'jacoco'
+apply plugin: 'org.liquibase.gradle'
 //apply plugin: 'com.google.cloud.tools.jib'
 //apply from: 'jib.gradle'
 
@@ -42,14 +78,18 @@ dependencies {
     implementation('org.springframework.boot:spring-boot-starter-web')
     implementation('org.springframework.boot:spring-boot-starter-actuator')
     implementation('org.springframework.boot:spring-boot-starter-security')
-    implementation('org.springframework.boot:spring-boot-starter-data-jpa')
     implementation('org.springframework.boot:spring-boot-starter-mail')
+    implementation('org.springframework.boot:spring-boot-starter-jooq')
 
     // бд
     implementation('org.postgresql:postgresql:42.6.0')
-    implementation('org.liquibase:liquibase-core')
+    liquibaseRuntime 'org.liquibase:liquibase-core:4.26.0'
+    liquibaseRuntime 'org.liquibase:liquibase-groovy-dsl:3.0.2'
+    liquibaseRuntime 'info.picocli:picocli:4.6.1'
     runtimeOnly('org.postgresql:postgresql')
-    annotationProcessor('org.hibernate:hibernate-jpamodelgen:6.6.10.Final')
+    implementation("org.springframework:spring-jdbc")
+    implementation("org.springframework:spring-context")
+    liquibaseRuntime("org.postgresql:postgresql:42.6.0")
 
     // тесты
     testImplementation("org.springframework.boot:spring-boot-starter-test")
@@ -57,6 +97,7 @@ dependencies {
     testImplementation('io.zonky.test:embedded-postgres:2.1.0')
     testImplementation('org.projectlombok:lombok:1.18.30')
     testAnnotationProcessor('org.projectlombok:lombok:1.18.30')
+    testImplementation('org.springframework.boot:spring-boot-starter-data-jpa')
 
     // документация
     implementation('org.springdoc:springdoc-openapi-starter-webmvc-ui:2.1.0')
@@ -101,3 +142,52 @@ jacocoTestReport {
         xml.required = true
     }
 }
+
+
+
+task generateCode() {
+    if (!genpath.exists()) {
+        genpath.mkdirs()
+    }
+
+    org.jooq.meta.jaxb.Configuration configuration = new org.jooq.meta.jaxb.Configuration()
+            .withJdbc(new Jdbc()
+                    .withDriver(db.driver)
+                    .withUrl(db.url)
+                    .withUser(db.user)
+                    .withPassword(db.password)
+            )
+            .withGenerator(new Generator()
+                    .withDatabase(new Database()
+                            .withName(db.jooqDbImpl)
+                            .withIncludes(".*")
+                            .withExcludes("")
+                            .withInputSchema(db.schema)
+                    )
+                    .withTarget(new Target()
+                            .withPackageName(db.packageName)
+                            .withDirectory(genpath.toString())
+                    )
+            );
+
+    GenerationTool.generate(configuration);
+
+}
+
+java {
+    sourceSets["main"].java.srcDirs(genpath.toString())
+}
+
+liquibase {
+    activities {
+        main {
+            changelogFile "db/liquibase-changelog.xml"
+            searchPath "./src/main/resources"
+            url db.url
+            username db.user
+            password db.password
+        }
+    }
+}
+
+compileJava.dependsOn update

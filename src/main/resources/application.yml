@@ -15,10 +15,6 @@ spring:
   jackson:
     serialization:
       fail-on-empty-beans: false
-  liquibase:
-    enabled: true
-    change-log: classpath:db/liquibase-changelog.xml
-    default-schema: public
   jpa:
     properties:
       hibernate:
@@ -47,6 +43,3 @@ management:
 
 todolist:
   confirm-url: http://localhost:${server.port}${server.servlet.context-path}/register/confirm/email
-  mail:
-    username: test@notexisting.qwe
-    password: password

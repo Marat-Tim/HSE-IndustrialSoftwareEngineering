@@ -13,7 +13,7 @@ $$ LANGUAGE 'plpgsql';
 
 CREATE TABLE todolist
 (
-    id               int primary key,
+    id               serial primary key,
     title            text,
     todo             text,
     is_completed     boolean,
