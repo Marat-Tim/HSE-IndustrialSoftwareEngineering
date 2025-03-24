@@ -36,4 +36,6 @@ jobs:
           java-version: '21'
           distribution: adopt
       - name: Сборка и тестирование программы
-        run: ./gradlew build
+        run: |
+          ./gradlew update
+          ./gradlew build

@@ -11,14 +11,23 @@ BEGIN
 END;
 $$ LANGUAGE 'plpgsql';
 
+CREATE TABLE users
+(
+    username text    NOT NULL PRIMARY KEY,
+    password text    NOT NULL,
+    enabled  boolean NOT NULL
+);
+
 CREATE TABLE todolist
 (
     id               serial primary key,
     title            text,
     todo             text,
     is_completed     boolean,
+    username         text,
     created_at       timestamp(6) WITH TIME ZONE NOT NULL DEFAULT NOW(),
-    last_modified_at timestamp(6) WITH TIME ZONE NOT NULL DEFAULT NOW()
+    last_modified_at timestamp(6) WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    FOREIGN KEY (username) REFERENCES users (username)
 );
 
 CREATE TRIGGER todolist_last_modified_at_trigger
@@ -26,13 +35,6 @@ CREATE TRIGGER todolist_last_modified_at_trigger
     ON todolist
     FOR EACH ROW
 EXECUTE PROCEDURE update_modified_column_func();
-
-CREATE TABLE users
-(
-    username text    NOT NULL PRIMARY KEY,
-    password text    NOT NULL,
-    enabled  boolean NOT NULL
-);
 
 CREATE TABLE authorities
 (
