@@ -53,6 +53,11 @@ public class SecurityConfiguration {
                             rs.getWriter().write("\"Пользователя с такими данными не найдено\"");
                     })
                 )
+                .logout(logout -> logout
+                    .logoutSuccessHandler((rq, rs, auth) -> {
+                        rs.setContentType(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8).toString());
+                        rs.getWriter().write("\"Вы успешно разлогинились\"");
+                    }))
                 .exceptionHandling(exceptionHandling ->
                         exceptionHandling.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
                 )
