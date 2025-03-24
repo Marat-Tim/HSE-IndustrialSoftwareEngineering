@@ -2,11 +2,9 @@ package ru.marattim.todolist.auth;
 
 import java.nio.charset.StandardCharsets;
 import javax.sql.DataSource;
-
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
@@ -43,17 +41,17 @@ public class SecurityConfiguration {
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(Customizer.withDefaults())
                 .formLogin(form -> form
-                        .successHandler((rq, rs, auth) -> {
+                    .successHandler((rq, rs, auth) -> {
                             log.info("Аутентификация успешна: {}", auth.getName());
-                            rs.setContentType(new MediaType(MediaType.TEXT_PLAIN, StandardCharsets.UTF_8).toString());
-                            rs.getWriter().write("Аутентификация успешна");
-                        })
-                        .failureHandler((rq, rs, auth) -> {
+                            rs.setContentType(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8).toString());
+                            rs.getWriter().write("\"Аутентификация успешна\"");
+                    })
+                    .failureHandler((rq, rs, auth) -> {
                             log.info("Ошибка аутентификации", auth);
                             rs.sendError(401);
-                            rs.setContentType(new MediaType(MediaType.TEXT_PLAIN, StandardCharsets.UTF_8).toString());
-                            rs.getWriter().write("Пользователя с такими данными не найдено");
-                        })
+                            rs.setContentType(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8).toString());
+                            rs.getWriter().write("\"Пользователя с такими данными не найдено\"");
+                    })
                 )
                 .exceptionHandling(exceptionHandling ->
                         exceptionHandling.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))

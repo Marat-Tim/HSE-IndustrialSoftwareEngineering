@@ -1,0 +1,9 @@
+spring:
+  datasource:
+    username: postgres
+    password: sa
+    url: jdbc:postgresql://localhost:5432/todolist
+todolist:
+  mail:
+    username: test@notexisting.qwe
+    password: password
