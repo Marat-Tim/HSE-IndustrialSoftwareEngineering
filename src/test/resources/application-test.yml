@@ -12,3 +12,4 @@ logging:
           descriptor:
             sql:
               BasicBinder: TRACE
+  config: classpath:./logback-test.xml

@@ -4,6 +4,7 @@ spring:
     password: sa
     url: jdbc:postgresql://localhost:5432/todolist
 todolist:
+  log: console # или можно json
   mail:
     username: test@notexisting.qwe
-    password: password
+    password:

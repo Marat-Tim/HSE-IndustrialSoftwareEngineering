@@ -38,6 +38,7 @@ logging:
     liquibase: ERROR
     com.zaxxer.hikari.pool.ProxyLeakTask: ERROR
     org.springframework.web.filter: DEBUG
+  config: classpath:./logback-${todolist.log}.xml
 
 management:
   endpoints:

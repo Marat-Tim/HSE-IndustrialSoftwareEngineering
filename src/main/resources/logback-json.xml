@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+    <springProperty scope="context" name="activeProfile" source="spring.profiles.active"/>
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+            <providers>
+                <timestamp/>
+                <logLevel/>
+                <message/>
+                <callerData>
+                    <classFieldName>class_name</classFieldName>
+                    <methodFieldName>method_name</methodFieldName>
+                    <fileFieldName>file_name</fileFieldName>
+                    <lineFieldName>line_number</lineFieldName>
+                </callerData>
+                <contextName/>
+                <throwableClassName>
+                    <fieldName>exception</fieldName>
+                </throwableClassName>
+                <stackTrace>
+                    <throwableConverter
+                            class="net.logstash.logback.stacktrace.ShortenedThrowableConverter">
+                        <maxDepthPerThrowable>100</maxDepthPerThrowable>
+                        <maxLength>8192</maxLength>
+                        <rootCauseFirst>true</rootCauseFirst>
+                        <shortenedClassNameLength>25</shortenedClassNameLength>
+                    </throwableConverter>
+                </stackTrace>
+                <arguments/>
+                <tags/>
+                <threadName>
+                    <fieldName>thread</fieldName>
+                </threadName>
+                <loggerName>
+                    <fieldName>logger</fieldName>
+                </loggerName>
+                <version/>
+            </providers>
+        </encoder>
+    </appender>
+    <root level="INFO">
+        <appender-ref ref="STDOUT"/>
+    </root>
+
+</configuration>
